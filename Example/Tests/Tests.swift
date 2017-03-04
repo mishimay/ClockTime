@@ -1,50 +1,37 @@
-// https://github.com/Quick/Quick
-
 import Quick
 import Nimble
 import ClockTime
 
-class TableOfContentsSpec: QuickSpec {
+class ClockTimeSpec: QuickSpec {
+
     override func spec() {
-        describe("these will fail") {
-
-            it("can do maths") {
-                expect(1) == 2
+        describe("ClockTime") {
+            it("cannot be initialized with invalid values") {
+                expect(ClockTime(hour: 0, minute: 0, second: 0)).notTo(beNil())
+                expect(ClockTime(hour: 24, minute: 0, second: 0)).to(beNil())
+                expect(ClockTime(hour: 0, minute: 60, second: 0)).to(beNil())
+                expect(ClockTime(hour: 0, minute: 0, second: 60)).to(beNil())
             }
 
-            it("can read") {
-                expect("number") == "string"
+            it("can be added seconds") {
+                expect(ClockTime(hour: 23, minute: 59, second: 59)! + 1) == ClockTime(hour: 0, minute: 0, second: 0)
             }
 
-            it("will eventually fail") {
-                expect("time").toEventually( equal("done") )
+            it("can be subtracted seconds") {
+                expect(ClockTime(hour: 0, minute: 0, second: 0)! - 1) == ClockTime(hour: 23, minute: 59, second: 59)
             }
-            
-            context("these will pass") {
 
-                it("can do maths") {
-                    expect(23) == 23
-                }
+            it("is comparable") {
+                expect(ClockTime(hour: 1, minute: 2, second: 3)) == ClockTime(hour: 1, minute: 2, second: 3)
+                expect(ClockTime(hour: 1, minute: 2, second: 2)!) < ClockTime(hour: 1, minute: 2, second: 3)!
+                expect(ClockTime(hour: 1, minute: 3, second: 2)!) > ClockTime(hour: 1, minute: 2, second: 3)!
+            }
 
-                it("can read") {
-                    expect("🐮") == "🐮"
-                }
-
-                it("will eventually pass") {
-                    var time = "passing"
-
-                    DispatchQueue.main.async {
-                        time = "done"
-                    }
-
-                    waitUntil { done in
-                        Thread.sleep(forTimeInterval: 0.5)
-                        expect(time) == "done"
-
-                        done()
-                    }
-                }
+            it("determines whether it is between two clock times") {
+                expect(ClockTime(hour: 23, minute: 59, second: 59)!.isBetween(beginning: ClockTime(hour: 23, minute: 59, second: 59)!, end: ClockTime(hour: 23, minute: 59, second: 59)!)) == false
+                expect(ClockTime(hour: 23, minute: 59, second: 59)!.isBetween(beginning: ClockTime(hour: 23, minute: 59, second: 59)!, end: ClockTime(hour: 0, minute: 0, second: 0)!)) == true
             }
         }
     }
+
 }
