@@ -21,14 +21,30 @@ public struct ClockTime: CustomDebugStringConvertible, Equatable, Comparable {
         self.second = second
     }
 
-    public init(calendar: Calendar = Calendar.current, date: Date) {
+    public init(date: Date, in calendar: Calendar = Calendar.current) {
         self.hour = UInt(calendar.component(.hour, from: date))
         self.minute = UInt(calendar.component(.minute, from: date))
         self.second = UInt(calendar.component(.second, from: date))
     }
 
-    public func isBetween(beginning time1: ClockTime, end time2: ClockTime) -> Bool {
-        return self - time1.interval < time2 - time1.interval
+    public func isBetween(_ start: ClockTime, and end: ClockTime) -> Bool {
+        return self - start.interval <= end - start.interval
+    }
+
+    public func matchingDates(from start: Date, to end: Date, in calendar: Calendar = Calendar.current) -> [Date] {
+        let dateComponents = DateComponents(hour: Int(hour), minute: Int(minute), second: Int(second))
+        var matching = [Date]()
+        if self == ClockTime(date: start, in: calendar) {
+            matching.append(start)
+        }
+        var date = start
+        while true {
+            guard let nextDate = calendar.nextDate(after: date, matching: dateComponents, matchingPolicy: .nextTime, direction: .forward),
+                nextDate <= end else { break }
+            matching.append(nextDate)
+            date = nextDate
+        }
+        return matching
     }
 
     public static func ==(lhs: ClockTime, rhs: ClockTime) -> Bool {
