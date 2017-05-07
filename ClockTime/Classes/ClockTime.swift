@@ -2,11 +2,11 @@ import Foundation
 
 public struct ClockTime: CustomDebugStringConvertible, Equatable, Comparable {
 
-    public let hour: UInt
-    public let minute: UInt
-    public let second: UInt
+    public let hour: Int
+    public let minute: Int
+    public let second: Int
 
-    public var interval: UInt {
+    public var interval: Int {
         return hour * 60 * 60 + minute * 60 + second
     }
 
@@ -14,17 +14,18 @@ public struct ClockTime: CustomDebugStringConvertible, Equatable, Comparable {
         return "\(hour)h \(minute)m \(second)s"
     }
 
-    public init?(hour: UInt, minute: UInt, second: UInt) {
-        guard hour < 24, minute < 60, second < 60 else { return nil }
+    public init?(hour: Int, minute: Int, second: Int) {
+        guard hour >= 0, minute >= 0, second >= 0,
+            hour < 24, minute < 60, second < 60 else { return nil }
         self.hour = hour
         self.minute = minute
         self.second = second
     }
 
     public init(date: Date, in calendar: Calendar = Calendar.current) {
-        self.hour = UInt(calendar.component(.hour, from: date))
-        self.minute = UInt(calendar.component(.minute, from: date))
-        self.second = UInt(calendar.component(.second, from: date))
+        self.hour = calendar.component(.hour, from: date)
+        self.minute = calendar.component(.minute, from: date)
+        self.second = calendar.component(.second, from: date)
     }
 
     public func isBetween(_ start: ClockTime, and end: ClockTime) -> Bool {
@@ -32,7 +33,7 @@ public struct ClockTime: CustomDebugStringConvertible, Equatable, Comparable {
     }
 
     public func matchingDates(from start: Date, to end: Date, in calendar: Calendar = Calendar.current) -> [Date] {
-        let dateComponents = DateComponents(hour: Int(hour), minute: Int(minute), second: Int(second))
+        let dateComponents = DateComponents(hour: hour, minute: minute, second: second)
         var matching = [Date]()
         if self == ClockTime(date: start, in: calendar) {
             matching.append(start)
@@ -55,7 +56,7 @@ public struct ClockTime: CustomDebugStringConvertible, Equatable, Comparable {
         return lhs.interval < rhs.interval
     }
 
-    public static func +(lhs: ClockTime, rhs: UInt) -> ClockTime {
+    public static func +(lhs: ClockTime, rhs: Int) -> ClockTime {
         var hour = lhs.hour
         var minute = lhs.minute
         var second = lhs.second
@@ -68,8 +69,8 @@ public struct ClockTime: CustomDebugStringConvertible, Equatable, Comparable {
         return ClockTime(hour: hour, minute: minute, second: second)!
     }
 
-    public static func -(lhs: ClockTime, rhs: UInt) -> ClockTime {
-        let day: UInt = 24 * 60 * 60
+    public static func -(lhs: ClockTime, rhs: Int) -> ClockTime {
+        let day: Int = 24 * 60 * 60
         let count = rhs / day + 1
         let interval = day * count - rhs
         return lhs + interval
